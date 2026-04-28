@@ -61,7 +61,16 @@ const defaultProducts: Product[] = [
 
 export type CartItem = { productId: string; quantity: number };
 export type User = { id: string; name: string; email: string; password: string; role: "client" | "admin" };
-export type Order = { id: string; userId: string; userName: string; items: CartItem[]; total: number; date: string };
+export type PaymentMethod = "credit" | "debit" | "pix" | "recurring";
+export type Order = {
+  id: string;
+  userId: string;
+  userName: string;
+  items: CartItem[];
+  total: number;
+  date: string;
+  paymentMethod?: PaymentMethod;
+};
 export type Message = { id: string; name: string; email: string; message: string; date: string; reply?: string };
 
 type State = {
@@ -194,7 +203,7 @@ export const actions = {
   logout() {
     setState((s) => ({ ...s, currentUserId: null }));
   },
-  checkout(coupon: string): { ok: boolean; orderId?: string } {
+  checkout(coupon: string, paymentMethod: PaymentMethod = "credit"): { ok: boolean; orderId?: string } {
     const u = state.users.find((x) => x.id === state.currentUserId);
     if (!u || state.cart.length === 0) return { ok: false };
     const subtotal = state.cart.reduce((a, c) => {
@@ -210,6 +219,7 @@ export const actions = {
       items: state.cart,
       total,
       date: new Date().toISOString(),
+      paymentMethod,
     };
     setState((s) => ({ ...s, orders: [...s.orders, order], cart: [] }));
     return { ok: true, orderId: order.id };
