@@ -35,6 +35,11 @@ function SalesPage() {
                 <div>
                   <p className="font-medium">{o.userName}</p>
                   <p className="text-xs text-muted-foreground">#{o.id} · {new Date(o.date).toLocaleString("pt-BR")}</p>
+                  {o.paymentMethod && (
+                    <p className="text-xs text-primary mt-1 font-medium uppercase tracking-wider">
+                      {({ credit: "Crédito", debit: "Débito", pix: "PIX", recurring: "Recorrente" } as const)[o.paymentMethod]}
+                    </p>
+                  )}
                 </div>
                 <p className="font-display text-xl font-semibold text-primary">{formatBRL(o.total)}</p>
               </div>
