@@ -9,38 +9,220 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SuporteRouteImport } from './routes/suporte'
+import { Route as ProdutosRouteImport } from './routes/produtos'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as CarrinhoRouteImport } from './routes/carrinho'
+import { Route as BeneficiosRouteImport } from './routes/beneficios'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminVendasRouteImport } from './routes/admin.vendas'
+import { Route as AdminProdutosRouteImport } from './routes/admin.produtos'
+import { Route as AdminMensagensRouteImport } from './routes/admin.mensagens'
+import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
 
+const SuporteRoute = SuporteRouteImport.update({
+  id: '/suporte',
+  path: '/suporte',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProdutosRoute = ProdutosRouteImport.update({
+  id: '/produtos',
+  path: '/produtos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CarrinhoRoute = CarrinhoRouteImport.update({
+  id: '/carrinho',
+  path: '/carrinho',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BeneficiosRoute = BeneficiosRouteImport.update({
+  id: '/beneficios',
+  path: '/beneficios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminVendasRoute = AdminVendasRouteImport.update({
+  id: '/vendas',
+  path: '/vendas',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProdutosRoute = AdminProdutosRouteImport.update({
+  id: '/produtos',
+  path: '/produtos',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMensagensRoute = AdminMensagensRouteImport.update({
+  id: '/mensagens',
+  path: '/mensagens',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminClientesRoute = AdminClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/beneficios': typeof BeneficiosRoute
+  '/carrinho': typeof CarrinhoRoute
+  '/login': typeof LoginRoute
+  '/produtos': typeof ProdutosRoute
+  '/suporte': typeof SuporteRoute
+  '/admin/clientes': typeof AdminClientesRoute
+  '/admin/mensagens': typeof AdminMensagensRoute
+  '/admin/produtos': typeof AdminProdutosRoute
+  '/admin/vendas': typeof AdminVendasRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/beneficios': typeof BeneficiosRoute
+  '/carrinho': typeof CarrinhoRoute
+  '/login': typeof LoginRoute
+  '/produtos': typeof ProdutosRoute
+  '/suporte': typeof SuporteRoute
+  '/admin/clientes': typeof AdminClientesRoute
+  '/admin/mensagens': typeof AdminMensagensRoute
+  '/admin/produtos': typeof AdminProdutosRoute
+  '/admin/vendas': typeof AdminVendasRoute
+  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/beneficios': typeof BeneficiosRoute
+  '/carrinho': typeof CarrinhoRoute
+  '/login': typeof LoginRoute
+  '/produtos': typeof ProdutosRoute
+  '/suporte': typeof SuporteRoute
+  '/admin/clientes': typeof AdminClientesRoute
+  '/admin/mensagens': typeof AdminMensagensRoute
+  '/admin/produtos': typeof AdminProdutosRoute
+  '/admin/vendas': typeof AdminVendasRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/beneficios'
+    | '/carrinho'
+    | '/login'
+    | '/produtos'
+    | '/suporte'
+    | '/admin/clientes'
+    | '/admin/mensagens'
+    | '/admin/produtos'
+    | '/admin/vendas'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/beneficios'
+    | '/carrinho'
+    | '/login'
+    | '/produtos'
+    | '/suporte'
+    | '/admin/clientes'
+    | '/admin/mensagens'
+    | '/admin/produtos'
+    | '/admin/vendas'
+    | '/admin'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/beneficios'
+    | '/carrinho'
+    | '/login'
+    | '/produtos'
+    | '/suporte'
+    | '/admin/clientes'
+    | '/admin/mensagens'
+    | '/admin/produtos'
+    | '/admin/vendas'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
+  BeneficiosRoute: typeof BeneficiosRoute
+  CarrinhoRoute: typeof CarrinhoRoute
+  LoginRoute: typeof LoginRoute
+  ProdutosRoute: typeof ProdutosRoute
+  SuporteRoute: typeof SuporteRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/suporte': {
+      id: '/suporte'
+      path: '/suporte'
+      fullPath: '/suporte'
+      preLoaderRoute: typeof SuporteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/produtos': {
+      id: '/produtos'
+      path: '/produtos'
+      fullPath: '/produtos'
+      preLoaderRoute: typeof ProdutosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/carrinho': {
+      id: '/carrinho'
+      path: '/carrinho'
+      fullPath: '/carrinho'
+      preLoaderRoute: typeof CarrinhoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/beneficios': {
+      id: '/beneficios'
+      path: '/beneficios'
+      fullPath: '/beneficios'
+      preLoaderRoute: typeof BeneficiosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +230,70 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/vendas': {
+      id: '/admin/vendas'
+      path: '/vendas'
+      fullPath: '/admin/vendas'
+      preLoaderRoute: typeof AdminVendasRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/produtos': {
+      id: '/admin/produtos'
+      path: '/produtos'
+      fullPath: '/admin/produtos'
+      preLoaderRoute: typeof AdminProdutosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/mensagens': {
+      id: '/admin/mensagens'
+      path: '/mensagens'
+      fullPath: '/admin/mensagens'
+      preLoaderRoute: typeof AdminMensagensRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/clientes': {
+      id: '/admin/clientes'
+      path: '/clientes'
+      fullPath: '/admin/clientes'
+      preLoaderRoute: typeof AdminClientesRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
+interface AdminRouteChildren {
+  AdminClientesRoute: typeof AdminClientesRoute
+  AdminMensagensRoute: typeof AdminMensagensRoute
+  AdminProdutosRoute: typeof AdminProdutosRoute
+  AdminVendasRoute: typeof AdminVendasRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminClientesRoute: AdminClientesRoute,
+  AdminMensagensRoute: AdminMensagensRoute,
+  AdminProdutosRoute: AdminProdutosRoute,
+  AdminVendasRoute: AdminVendasRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
+  BeneficiosRoute: BeneficiosRoute,
+  CarrinhoRoute: CarrinhoRoute,
+  LoginRoute: LoginRoute,
+  ProdutosRoute: ProdutosRoute,
+  SuporteRoute: SuporteRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
