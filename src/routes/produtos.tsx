@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/produtos")({
-  validateSearch: (s: Record<string, unknown>) => ({ q: (s.q as string) || "" }),
+  validateSearch: (s: Record<string, unknown>): { q?: string } => ({ q: (s.q as string) || undefined }),
   head: () => ({
     meta: [
       { title: "Produtos — Stellari" },
