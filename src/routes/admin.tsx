@@ -10,13 +10,13 @@ export const Route = createFileRoute("/admin")({
   component: AdminLayout,
 });
 
-const links = [
+const links: ReadonlyArray<{ to: "/admin" | "/admin/clientes" | "/admin/vendas" | "/admin/produtos" | "/admin/mensagens"; label: string; icon: typeof LayoutDashboard; exact?: boolean }> = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/clientes", label: "Clientes", icon: Users },
   { to: "/admin/vendas", label: "Vendas", icon: ShoppingBag },
   { to: "/admin/produtos", label: "Produtos", icon: Package },
   { to: "/admin/mensagens", label: "Mensagens", icon: MessageSquare },
-] as const;
+];
 
 function AdminLayout() {
   const currentUser = useStore((s) => s.users.find((u) => u.id === s.currentUserId));
