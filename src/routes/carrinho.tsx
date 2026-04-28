@@ -37,11 +37,7 @@ function CartPage() {
       navigate({ to: "/login" });
       return;
     }
-    const r = actions.checkout(appliedCoupon);
-    if (r.ok) {
-      toast.success("Pedido realizado com sucesso!");
-      navigate({ to: "/" });
-    }
+    navigate({ to: "/checkout", search: { coupon: appliedCoupon } as never });
   };
 
   if (cart.length === 0) {

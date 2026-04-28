@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
-import { actions, useStore } from "@/lib/store";
+import { actions, useStore, getState } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,9 +24,12 @@ function LoginPage() {
   const navigate = useNavigate();
   const currentUser = useStore((s) => s.users.find((u) => u.id === s.currentUserId));
 
-  if (currentUser) {
-    navigate({ to: currentUser.role === "admin" ? "/admin" : "/" });
-  }
+  // Safe redirect after render when already logged in
+  useEffect(() => {
+    if (currentUser) {
+      navigate({ to: currentUser.role === "admin" ? "/admin" : "/" });
+    }
+  }, [currentUser, navigate]);
 
   const [login, setLogin] = useState({ email: "", password: "" });
   const [reg, setReg] = useState({ name: "", email: "", password: "" });
@@ -36,16 +39,9 @@ function LoginPage() {
     const r = actions.login(login.email, login.password);
     if (!r.ok) return toast.error(r.error!);
     toast.success("Bem-vinda de volta!");
-    const u = useStore.length;
-    void u;
-    setTimeout(() => {
-      const cu = (window as any) && undefined;
-      void cu;
-      // navigate via state
-      const role = JSON.parse(localStorage.getItem("stellari-state-v1") || "{}");
-      const me = role.users?.find((x: any) => x.id === role.currentUserId);
-      navigate({ to: me?.role === "admin" ? "/admin" : "/" });
-    }, 100);
+    const s = getState();
+    const me = s.users.find((u) => u.id === s.currentUserId);
+    navigate({ to: me?.role === "admin" ? "/admin" : "/" });
   };
 
   const doRegister = (e: React.FormEvent) => {
