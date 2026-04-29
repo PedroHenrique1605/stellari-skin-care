@@ -38,8 +38,8 @@ export const Route = createRootRoute({
       { property: "og:type", content: "website" },
       { name: "twitter:title", content: "Stellari — Géis cicatrizantes farmacêuticos" },
       { name: "twitter:description", content: "Stellari: linha farmacêutica de géis cicatrizantes com extratos botânicos. Cuidado que acalma, beleza que floresce." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8dbc9e61-e009-448b-96c4-858367d0e6e7/id-preview-86f2a610--09226419-845b-4fd1-ab5b-ee09400173d0.lovable.app-1777419229883.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8dbc9e61-e009-448b-96c4-858367d0e6e7/id-preview-86f2a610--09226419-845b-4fd1-ab5b-ee09400173d0.lovable.app-1777419229883.png" },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/180c7577-deae-40d3-bf2a-f565e4ab5efb/id-preview-487f481f--09226419-845b-4fd1-ab5b-ee09400173d0.lovable.app-1777500273247.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/180c7577-deae-40d3-bf2a-f565e4ab5efb/id-preview-487f481f--09226419-845b-4fd1-ab5b-ee09400173d0.lovable.app-1777500273247.png" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
