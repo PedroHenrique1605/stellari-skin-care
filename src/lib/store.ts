@@ -71,7 +71,7 @@ export type Order = {
   date: string;
   paymentMethod?: PaymentMethod;
 };
-export type Message = { id: string; name: string; email: string; message: string; date: string; reply?: string };
+export type Message = { id: string; userId?: string; name: string; email: string; message: string; date: string; reply?: string; replyDate?: string };
 
 type State = {
   products: Product[];
@@ -224,12 +224,12 @@ export const actions = {
     setState((s) => ({ ...s, orders: [...s.orders, order], cart: [] }));
     return { ok: true, orderId: order.id };
   },
-  sendMessage(name: string, email: string, message: string) {
-    const m: Message = { id: `msg-${Date.now()}`, name, email, message, date: new Date().toISOString() };
+  sendMessage(name: string, email: string, message: string, userId?: string) {
+    const m: Message = { id: `msg-${Date.now()}`, userId, name, email, message, date: new Date().toISOString() };
     setState((s) => ({ ...s, messages: [...s.messages, m] }));
   },
   replyMessage(id: string, reply: string) {
-    setState((s) => ({ ...s, messages: s.messages.map((m) => (m.id === id ? { ...m, reply } : m)) }));
+    setState((s) => ({ ...s, messages: s.messages.map((m) => (m.id === id ? { ...m, reply, replyDate: new Date().toISOString() } : m)) }));
   },
   saveProduct(p: Product) {
     setState((s) => ({

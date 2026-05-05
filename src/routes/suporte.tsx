@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
-import { actions } from "@/lib/store";
+import { actions, useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,17 +31,21 @@ const schema = z.object({
 });
 
 function SupportPage() {
+  const currentUser = useStore((s) => s.users.find((u) => u.id === s.currentUserId));
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [sent, setSent] = useState(false);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    const r = schema.safeParse(form);
+    const data = currentUser
+      ? { name: currentUser.name, email: currentUser.email, message: form.message }
+      : form;
+    const r = schema.safeParse(data);
     if (!r.success) {
       toast.error(r.error.errors[0].message);
       return;
     }
-    actions.sendMessage(form.name, form.email, form.message);
+    actions.sendMessage(data.name, data.email, data.message, currentUser?.id);
     setSent(true);
     setForm({ name: "", email: "", message: "" });
     toast.success("Mensagem enviada com sucesso!");

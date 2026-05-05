@@ -2,6 +2,7 @@ import { Outlet, createRootRoute, HeadContent, Scripts, Link, useRouterState } f
 import appCss from "../styles.css?url";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { MessagesFab } from "@/components/MessagesFab";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -82,6 +83,7 @@ function RootComponent() {
         <Outlet />
       </main>
       {!isAdmin && <Footer />}
+      {!isAdmin && <MessagesFab />}
       <Toaster position="top-right" />
     </div>
   );
