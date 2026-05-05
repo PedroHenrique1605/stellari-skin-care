@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useStore } from "@/lib/store";
 import { useNavigate } from "@tanstack/react-router";
 import { Mail, Reply, MessageCircle } from "lucide-react";
@@ -11,10 +11,15 @@ export const Route = createFileRoute("/minhas-mensagens")({
 
 function MyMessagesPage() {
   const currentUser = useStore((s) => s.users.find((u) => u.id === s.currentUserId));
-  const messages = useStore((s) =>
-    s.messages.filter(
-      (m) => (currentUser && (m.userId === currentUser.id || m.email === currentUser.email)),
-    ),
+  const allMessages = useStore((s) => s.messages);
+  const messages = useMemo(
+    () =>
+      currentUser
+        ? allMessages.filter(
+            (m) => m.userId === currentUser.id || m.email === currentUser.email,
+          )
+        : [],
+    [allMessages, currentUser],
   );
   const navigate = useNavigate();
 
