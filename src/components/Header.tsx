@@ -95,6 +95,9 @@ export function Header() {
                   <DropdownMenuItem onClick={() => navigate({ to: "/carrinho" })}>
                     Meu carrinho
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate({ to: "/minhas-mensagens" })}>
+                    Minhas mensagens
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => actions.logout()}>Sair</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
