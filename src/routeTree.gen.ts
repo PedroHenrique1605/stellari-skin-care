@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SuporteRouteImport } from './routes/suporte'
 import { Route as ProdutosRouteImport } from './routes/produtos'
+import { Route as MinhasMensagensRouteImport } from './routes/minhas-mensagens'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CarrinhoRouteImport } from './routes/carrinho'
@@ -31,6 +32,11 @@ const SuporteRoute = SuporteRouteImport.update({
 const ProdutosRoute = ProdutosRouteImport.update({
   id: '/produtos',
   path: '/produtos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MinhasMensagensRoute = MinhasMensagensRouteImport.update({
+  id: '/minhas-mensagens',
+  path: '/minhas-mensagens',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/carrinho': typeof CarrinhoRoute
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
+  '/minhas-mensagens': typeof MinhasMensagensRoute
   '/produtos': typeof ProdutosRoute
   '/suporte': typeof SuporteRoute
   '/admin/clientes': typeof AdminClientesRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/carrinho': typeof CarrinhoRoute
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
+  '/minhas-mensagens': typeof MinhasMensagensRoute
   '/produtos': typeof ProdutosRoute
   '/suporte': typeof SuporteRoute
   '/admin/clientes': typeof AdminClientesRoute
@@ -126,6 +134,7 @@ export interface FileRoutesById {
   '/carrinho': typeof CarrinhoRoute
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
+  '/minhas-mensagens': typeof MinhasMensagensRoute
   '/produtos': typeof ProdutosRoute
   '/suporte': typeof SuporteRoute
   '/admin/clientes': typeof AdminClientesRoute
@@ -143,6 +152,7 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/checkout'
     | '/login'
+    | '/minhas-mensagens'
     | '/produtos'
     | '/suporte'
     | '/admin/clientes'
@@ -157,6 +167,7 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/checkout'
     | '/login'
+    | '/minhas-mensagens'
     | '/produtos'
     | '/suporte'
     | '/admin/clientes'
@@ -172,6 +183,7 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/checkout'
     | '/login'
+    | '/minhas-mensagens'
     | '/produtos'
     | '/suporte'
     | '/admin/clientes'
@@ -188,6 +200,7 @@ export interface RootRouteChildren {
   CarrinhoRoute: typeof CarrinhoRoute
   CheckoutRoute: typeof CheckoutRoute
   LoginRoute: typeof LoginRoute
+  MinhasMensagensRoute: typeof MinhasMensagensRoute
   ProdutosRoute: typeof ProdutosRoute
   SuporteRoute: typeof SuporteRoute
 }
@@ -206,6 +219,13 @@ declare module '@tanstack/react-router' {
       path: '/produtos'
       fullPath: '/produtos'
       preLoaderRoute: typeof ProdutosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/minhas-mensagens': {
+      id: '/minhas-mensagens'
+      path: '/minhas-mensagens'
+      fullPath: '/minhas-mensagens'
+      preLoaderRoute: typeof MinhasMensagensRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -313,9 +333,19 @@ const rootRouteChildren: RootRouteChildren = {
   CarrinhoRoute: CarrinhoRoute,
   CheckoutRoute: CheckoutRoute,
   LoginRoute: LoginRoute,
+  MinhasMensagensRoute: MinhasMensagensRoute,
   ProdutosRoute: ProdutosRoute,
   SuporteRoute: SuporteRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
