@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { useStore, formatBRL } from "@/lib/store";
 import { Users, ShoppingBag, Package, DollarSign, TrendingUp, MessageSquare } from "lucide-react";
 
@@ -7,10 +8,11 @@ export const Route = createFileRoute("/admin/")({
 });
 
 function AdminDashboard() {
-  const users = useStore((s) => s.users.filter((u) => u.role === "client"));
+  const allUsers = useStore((s) => s.users);
   const orders = useStore((s) => s.orders);
   const products = useStore((s) => s.products);
   const messages = useStore((s) => s.messages);
+  const users = useMemo(() => allUsers.filter((u) => u.role === "client"), [allUsers]);
 
   const revenue = orders.reduce((a, o) => a + o.total, 0);
   const unitsSold = orders.reduce((a, o) => a + o.items.reduce((b, i) => b + i.quantity, 0), 0);
