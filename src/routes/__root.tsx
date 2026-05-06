@@ -1,9 +1,12 @@
 import { Outlet, createRootRoute, HeadContent, Scripts, Link, useRouterState } from "@tanstack/react-router";
+import { useEffect } from "react";
 import appCss from "../styles.css?url";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { MessagesFab } from "@/components/MessagesFab";
 import { Toaster } from "@/components/ui/sonner";
+import { produtosApi, pickId } from "@/lib/api";
+import { actions, type Product } from "@/lib/store";
 
 function NotFoundComponent() {
   return (
