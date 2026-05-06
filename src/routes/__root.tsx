@@ -7,6 +7,7 @@ import { MessagesFab } from "@/components/MessagesFab";
 import { Toaster } from "@/components/ui/sonner";
 import { produtosApi, pickId } from "@/lib/api";
 import { actions, type Product, getState } from "@/lib/store";
+import productJar from "@/assets/product-cream-jar.jpeg";
 
 function NotFoundComponent() {
   return (
