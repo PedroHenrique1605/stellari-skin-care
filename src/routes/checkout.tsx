@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { CreditCard, Wallet, QrCode, Repeat, Check, Loader2, ShieldCheck } from "lucide-react";
 import { useStore, actions, calcCart, formatBRL, type PaymentMethod } from "@/lib/store";
+import { pagamentosApi, pedidosApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
