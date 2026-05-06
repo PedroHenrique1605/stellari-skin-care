@@ -60,7 +60,7 @@ const defaultProducts: Product[] = [
 ];
 
 export type CartItem = { productId: string; quantity: number };
-export type User = { id: string; name: string; email: string; password: string; role: "client" | "admin" };
+export type User = { id: string; name: string; email: string; password: string; role: "client" | "admin"; backendId?: number };
 export type PaymentMethod = "credit" | "debit" | "pix" | "recurring";
 export type Order = {
   id: string;
@@ -182,15 +182,18 @@ export const actions = {
   clearCart() {
     setState((s) => ({ ...s, cart: [] }));
   },
-  register(name: string, email: string, password: string): { ok: boolean; error?: string } {
+  register(name: string, email: string, password: string, backendId?: number): { ok: boolean; error?: string } {
     if (state.users.some((u) => u.email === email)) return { ok: false, error: "E-mail já cadastrado" };
     const id = `user-${Date.now()}`;
     setState((s) => ({
       ...s,
-      users: [...s.users, { id, name, email, password: btoa(password), role: "client" }],
+      users: [...s.users, { id, name, email, password: btoa(password), role: "client", backendId }],
       currentUserId: id,
     }));
     return { ok: true };
+  },
+  setProductsFromApi(products: Product[]) {
+    setState((s) => ({ ...s, products }));
   },
   login(email: string, password: string): { ok: boolean; error?: string } {
     const user = state.users.find(

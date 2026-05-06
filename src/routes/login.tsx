@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { actions, useStore, getState } from "@/lib/store";
+import { clientesApi, pickId } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,11 +45,23 @@ function LoginPage() {
     navigate({ to: me?.role === "admin" ? "/admin" : "/" });
   };
 
-  const doRegister = (e: React.FormEvent) => {
+  const doRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     const r = registerSchema.safeParse(reg);
     if (!r.success) return toast.error(r.error.errors[0].message);
-    const res = actions.register(reg.name, reg.email, reg.password);
+    let backendId: number | undefined;
+    try {
+      const created = await clientesApi.create({
+        nome: reg.name,
+        email: reg.email,
+        senha: reg.password,
+      });
+      backendId = pickId(created);
+    } catch (err) {
+      toast.error(`Falha ao criar cliente na API: ${(err as Error).message}`);
+      return;
+    }
+    const res = actions.register(reg.name, reg.email, reg.password, backendId);
     if (!res.ok) return toast.error(res.error!);
     toast.success("Conta criada com sucesso!");
     navigate({ to: "/" });

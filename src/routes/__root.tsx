@@ -1,9 +1,13 @@
 import { Outlet, createRootRoute, HeadContent, Scripts, Link, useRouterState } from "@tanstack/react-router";
+import { useEffect } from "react";
 import appCss from "../styles.css?url";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { MessagesFab } from "@/components/MessagesFab";
 import { Toaster } from "@/components/ui/sonner";
+import { produtosApi, pickId } from "@/lib/api";
+import { actions, type Product, getState } from "@/lib/store";
+import productJar from "@/assets/product-cream-jar.jpeg";
 
 function NotFoundComponent() {
   return (
@@ -75,6 +79,40 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isAdmin = pathname.startsWith("/admin");
+
+  useEffect(() => {
+    let cancelled = false;
+    produtosApi
+      .list()
+      .then((list) => {
+        if (cancelled || !Array.isArray(list) || list.length === 0) return;
+        const existing = getState().products;
+        const mapped: Product[] = list.map((p) => {
+          const id = String(pickId(p) ?? p.nome_produto);
+          const price = typeof p.valor === "string" ? parseFloat(p.valor) : Number(p.valor);
+          const prev = existing.find((x) => x.name === p.nome_produto);
+          return {
+            id,
+            name: p.nome_produto,
+            tagline: p.finalidade || p.indicacao || "",
+            description: p.descricao || "",
+            composition: (p.composicao || "").split(",").map((s) => s.trim()).filter(Boolean),
+            uses: (p.modo_uso || p.indicacao || "").split(/[.;\n]/).map((s) => s.trim()).filter(Boolean),
+            benefits: (p.beneficios || "").split(/[.;\n]/).map((s) => s.trim()).filter(Boolean),
+            price: Number.isFinite(price) ? price : 0,
+            image: prev?.image || productJar,
+            category: prev?.category || "Stellari",
+          };
+        });
+        actions.setProductsFromApi(mapped);
+      })
+      .catch(() => {
+        // API offline — mantém produtos locais como fallback silencioso
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
