@@ -86,9 +86,11 @@ function RootComponent() {
       .list()
       .then((list) => {
         if (cancelled || !Array.isArray(list) || list.length === 0) return;
+        const existing = getState().products;
         const mapped: Product[] = list.map((p) => {
           const id = String(pickId(p) ?? p.nome_produto);
           const price = typeof p.valor === "string" ? parseFloat(p.valor) : Number(p.valor);
+          const prev = existing.find((x) => x.name === p.nome_produto);
           return {
             id,
             name: p.nome_produto,
@@ -98,8 +100,8 @@ function RootComponent() {
             uses: (p.modo_uso || p.indicacao || "").split(/[.;\n]/).map((s) => s.trim()).filter(Boolean),
             benefits: (p.beneficios || "").split(/[.;\n]/).map((s) => s.trim()).filter(Boolean),
             price: Number.isFinite(price) ? price : 0,
-            image: "",
-            category: "",
+            image: prev?.image || productJar,
+            category: prev?.category || "Stellari",
           };
         });
         actions.setProductsFromApi(mapped);
