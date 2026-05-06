@@ -60,7 +60,7 @@ const defaultProducts: Product[] = [
 ];
 
 export type CartItem = { productId: string; quantity: number };
-export type User = { id: string; name: string; email: string; password: string; role: "client" | "admin" };
+export type User = { id: string; name: string; email: string; password: string; role: "client" | "admin"; backendId?: number };
 export type PaymentMethod = "credit" | "debit" | "pix" | "recurring";
 export type Order = {
   id: string;
