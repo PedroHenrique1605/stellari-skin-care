@@ -52,24 +52,60 @@ function CheckoutPage() {
     );
   }
 
-  const pay = (e: React.FormEvent) => {
+  const pay = async (e: React.FormEvent) => {
     e.preventDefault();
     if ((method === "credit" || method === "debit") && (!card.number || !card.name || !card.exp || !card.cvv)) {
       toast.error("Preencha os dados do cartão");
       return;
     }
     setProcessing(true);
-    // Simulate payment processing
-    setTimeout(() => {
-      const r = actions.checkout(coupon, method);
-      setProcessing(false);
-      if (r.ok) {
-        toast.success("Pagamento aprovado! Pedido registrado.");
-        navigate({ to: "/" });
-      } else {
-        toast.error("Falha ao processar pedido");
+
+    // Tenta enviar para o back-end (não bloqueia o pedido local se falhar)
+    const methodLabel = ({ credit: "Cartão de Crédito", debit: "Cartão de Débito", pix: "PIX", recurring: "Recorrente" } as const)[method];
+    if (currentUser?.backendId) {
+      try {
+        const pagamento = await pagamentosApi.create({
+          metodo: methodLabel,
+          status_pagamento: "Pago",
+          data_pagamento: new Date().toISOString().slice(0, 10),
+          status_entrega: "Pendente",
+          valor: calc.total,
+        });
+        const idPagamento = (pagamento as { id?: number; id_pagamento?: number }).id ?? (pagamento as { id_pagamento?: number }).id_pagamento;
+        const pedido = await pedidosApi.create({
+          frete: 0,
+          cupom: coupon || null,
+          total: calc.total,
+          data_hora: new Date().toISOString(),
+          id_cliente: currentUser.backendId,
+          id_pagamento: idPagamento ?? null,
+        });
+        const idPedido = (pedido as { id?: number; id_pedido?: number }).id ?? (pedido as { id_pedido?: number }).id_pedido;
+        if (idPedido) {
+          await Promise.all(
+            calc.items.map((it) =>
+              pedidosApi.addItem(idPedido, {
+                id_produto: Number(it.productId),
+                quantidade: it.quantity,
+                preco_unitario: it.product.price,
+              }),
+            ),
+          );
+        }
+      } catch (err) {
+        console.error("Falha ao registrar pedido na API", err);
+        toast.error(`API: ${(err as Error).message}`);
       }
-    }, 1600);
+    }
+
+    const r = actions.checkout(coupon, method);
+    setProcessing(false);
+    if (r.ok) {
+      toast.success("Pagamento aprovado! Pedido registrado.");
+      navigate({ to: "/" });
+    } else {
+      toast.error("Falha ao processar pedido");
+    }
   };
 
   return (
