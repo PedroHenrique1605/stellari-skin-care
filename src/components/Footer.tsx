@@ -40,9 +40,9 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-sm uppercase tracking-wider mb-4">Contato</h4>
             <ul className="space-y-2.5 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> contato@stellari.com</li>
-              <li className="flex items-center gap-2"><Phone className="h-4 w-4" /> (11) 4002-8922</li>
-              <li className="flex items-center gap-2"><MapPin className="h-4 w-4" /> São Paulo, Brasil</li>
+              <li className="flex items-center gap-2"><Mail className="h-4 w-4" /><span>contato@stellari.com</span></li>
+              <li className="flex items-center gap-2"><Phone className="h-4 w-4" /><span>(11) 4002-8922</span></li>
+              <li className="flex items-center gap-2"><MapPin className="h-4 w-4" /><span>São Paulo, Brasil</span></li>
             </ul>
           </div>
 
