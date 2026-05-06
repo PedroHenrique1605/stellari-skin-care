@@ -6,7 +6,7 @@ import { Footer } from "@/components/Footer";
 import { MessagesFab } from "@/components/MessagesFab";
 import { Toaster } from "@/components/ui/sonner";
 import { produtosApi, pickId } from "@/lib/api";
-import { actions, type Product } from "@/lib/store";
+import { actions, type Product, getState } from "@/lib/store";
 
 function NotFoundComponent() {
   return (
