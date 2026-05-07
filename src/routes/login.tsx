@@ -124,6 +124,18 @@ function LoginPage() {
                   <Input id="rpass" type="password" required value={reg.password} onChange={(e) => setReg({ ...reg, password: e.target.value })} className="mt-1.5" minLength={6} maxLength={72} />
                   <p className="text-xs text-muted-foreground mt-1.5">Mínimo 6 caracteres. Senha será criptografada.</p>
                 </div>
+                <div>
+                  <Label htmlFor="rtel">Telefone</Label>
+                  <Input id="rtel" required inputMode="numeric" placeholder="11987654321" value={reg.telefone} onChange={(e) => setReg({ ...reg, telefone: e.target.value.replace(/\D/g, "") })} className="mt-1.5" maxLength={11} />
+                </div>
+                <div>
+                  <Label htmlFor="rcpf">CPF</Label>
+                  <Input id="rcpf" required inputMode="numeric" placeholder="12345678900" value={reg.cpf} onChange={(e) => setReg({ ...reg, cpf: e.target.value.replace(/\D/g, "") })} className="mt-1.5" maxLength={11} />
+                </div>
+                <div>
+                  <Label htmlFor="rdob">Data de nascimento</Label>
+                  <Input id="rdob" type="date" required value={reg.data_nascimento} onChange={(e) => setReg({ ...reg, data_nascimento: e.target.value })} className="mt-1.5" />
+                </div>
                 <Button type="submit" className="w-full bg-gradient-primary text-primary-foreground rounded-full h-11 mt-2">Criar conta</Button>
               </form>
             </TabsContent>
