@@ -19,6 +19,9 @@ const registerSchema = z.object({
   name: z.string().trim().min(2).max(100),
   email: z.string().trim().email().max(255),
   password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres").max(72),
+  telefone: z.string().regex(/^\d{10,11}$/, "Telefone deve ter 10 ou 11 dígitos numéricos"),
+  cpf: z.string().regex(/^\d{11}$/, "CPF deve ter 11 dígitos numéricos (sem máscara)"),
+  data_nascimento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data deve estar no formato AAAA-MM-DD"),
 });
 
 function LoginPage() {
@@ -33,7 +36,7 @@ function LoginPage() {
   }, [currentUser, navigate]);
 
   const [login, setLogin] = useState({ email: "", password: "" });
-  const [reg, setReg] = useState({ name: "", email: "", password: "" });
+  const [reg, setReg] = useState({ name: "", email: "", password: "", telefone: "", cpf: "", data_nascimento: "" });
 
   const doLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,6 +58,9 @@ function LoginPage() {
         nome: reg.name,
         email: reg.email,
         senha: reg.password,
+        telefone: reg.telefone,
+        cpf: reg.cpf,
+        data_nascimento: reg.data_nascimento,
       });
       backendId = pickId(created);
     } catch (err) {
@@ -117,6 +123,18 @@ function LoginPage() {
                   <Label htmlFor="rpass">Senha</Label>
                   <Input id="rpass" type="password" required value={reg.password} onChange={(e) => setReg({ ...reg, password: e.target.value })} className="mt-1.5" minLength={6} maxLength={72} />
                   <p className="text-xs text-muted-foreground mt-1.5">Mínimo 6 caracteres. Senha será criptografada.</p>
+                </div>
+                <div>
+                  <Label htmlFor="rtel">Telefone</Label>
+                  <Input id="rtel" required inputMode="numeric" placeholder="11987654321" value={reg.telefone} onChange={(e) => setReg({ ...reg, telefone: e.target.value.replace(/\D/g, "") })} className="mt-1.5" maxLength={11} />
+                </div>
+                <div>
+                  <Label htmlFor="rcpf">CPF</Label>
+                  <Input id="rcpf" required inputMode="numeric" placeholder="12345678900" value={reg.cpf} onChange={(e) => setReg({ ...reg, cpf: e.target.value.replace(/\D/g, "") })} className="mt-1.5" maxLength={11} />
+                </div>
+                <div>
+                  <Label htmlFor="rdob">Data de nascimento</Label>
+                  <Input id="rdob" type="date" required value={reg.data_nascimento} onChange={(e) => setReg({ ...reg, data_nascimento: e.target.value })} className="mt-1.5" />
                 </div>
                 <Button type="submit" className="w-full bg-gradient-primary text-primary-foreground rounded-full h-11 mt-2">Criar conta</Button>
               </form>
