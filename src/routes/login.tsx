@@ -19,6 +19,9 @@ const registerSchema = z.object({
   name: z.string().trim().min(2).max(100),
   email: z.string().trim().email().max(255),
   password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres").max(72),
+  telefone: z.string().regex(/^\d{10,11}$/, "Telefone deve ter 10 ou 11 dígitos numéricos"),
+  cpf: z.string().regex(/^\d{11}$/, "CPF deve ter 11 dígitos numéricos (sem máscara)"),
+  data_nascimento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data deve estar no formato AAAA-MM-DD"),
 });
 
 function LoginPage() {
