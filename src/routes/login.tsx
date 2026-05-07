@@ -36,7 +36,7 @@ function LoginPage() {
   }, [currentUser, navigate]);
 
   const [login, setLogin] = useState({ email: "", password: "" });
-  const [reg, setReg] = useState({ name: "", email: "", password: "" });
+  const [reg, setReg] = useState({ name: "", email: "", password: "", telefone: "", cpf: "", data_nascimento: "" });
 
   const doLogin = (e: React.FormEvent) => {
     e.preventDefault();
