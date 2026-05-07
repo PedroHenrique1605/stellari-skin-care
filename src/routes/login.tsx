@@ -58,6 +58,9 @@ function LoginPage() {
         nome: reg.name,
         email: reg.email,
         senha: reg.password,
+        telefone: reg.telefone,
+        cpf: reg.cpf,
+        data_nascimento: reg.data_nascimento,
       });
       backendId = pickId(created);
     } catch (err) {
