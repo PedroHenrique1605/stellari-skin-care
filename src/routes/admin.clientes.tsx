@@ -1,21 +1,35 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useStore, formatBRL } from "@/lib/store";
+import { useEffect, useState } from "react";
+import { clientesApi, type ApiCliente } from "@/lib/api";
+import { formatBRL } from "@/lib/store";
+import { pedidosApi, type ApiPedido } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/clientes")({
   component: ClientsPage,
 });
 
 function ClientsPage() {
-  const allUsers = useStore((s) => s.users);
-  const orders = useStore((s) => s.orders);
-  const users = allUsers.filter((u) => u.role === "client");
+  const [clients, setClients] = useState<ApiCliente[]>([]);
+  const [pedidos, setPedidos] = useState<ApiPedido[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([clientesApi.list(), pedidosApi.listAll()])
+      .then(([c, p]) => { setClients(c); setPedidos(p); })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return <div className="text-muted-foreground py-12 text-center">Carregando clientes...</div>;
+  }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-3xl font-medium">Clientes</h1>
         <p className="text-muted-foreground text-sm">
-          {users.length} cliente(s) cadastrado(s) · {allUsers.length} usuário(s) no total.
+          {clients.length} cliente(s) cadastrado(s).
         </p>
       </div>
 
@@ -23,40 +37,33 @@ function ClientsPage() {
         <table className="w-full text-sm">
           <thead className="bg-muted/50">
             <tr className="text-left">
+              <th className="px-6 py-3 font-medium">ID</th>
               <th className="px-6 py-3 font-medium">Nome</th>
               <th className="px-6 py-3 font-medium">E-mail</th>
-              <th className="px-6 py-3 font-medium">Tipo</th>
+              <th className="px-6 py-3 font-medium">Telefone</th>
               <th className="px-6 py-3 font-medium text-right">Pedidos</th>
               <th className="px-6 py-3 font-medium text-right">Total gasto</th>
             </tr>
           </thead>
           <tbody>
-            {allUsers.length === 0 ? (
+            {clients.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
-                  Nenhum usuário cadastrado ainda.
+                <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
+                  Nenhum cliente cadastrado ainda.
                 </td>
               </tr>
             ) : (
-              allUsers.map((c) => {
-                const userOrders = orders.filter((o) => o.userId === c.id);
-                const total = userOrders.reduce((a, o) => a + o.total, 0);
+              clients.map((c) => {
+                const clientId = c.id ?? c.id_cliente;
+                const clientPedidos = pedidos.filter((p) => p.id_cliente === clientId);
+                const total = clientPedidos.reduce((a, p) => a + (p.total ?? 0), 0);
                 return (
-                  <tr key={c.id} className="border-t border-border">
-                    <td className="px-6 py-4 font-medium">{c.name}</td>
+                  <tr key={clientId} className="border-t border-border">
+                    <td className="px-6 py-4 text-muted-foreground">#{clientId}</td>
+                    <td className="px-6 py-4 font-medium">{c.nome}</td>
                     <td className="px-6 py-4 text-muted-foreground">{c.email}</td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                          c.role === "admin"
-                            ? "bg-gold/20 text-foreground"
-                            : "bg-primary/10 text-primary"
-                        }`}
-                      >
-                        {c.role === "admin" ? "Admin" : "Cliente"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">{userOrders.length}</td>
+                    <td className="px-6 py-4 text-muted-foreground">{c.telefone ?? "—"}</td>
+                    <td className="px-6 py-4 text-right">{clientPedidos.length}</td>
                     <td className="px-6 py-4 text-right font-semibold text-primary">
                       {formatBRL(total)}
                     </td>
@@ -70,4 +77,3 @@ function ClientsPage() {
     </div>
   );
 }
-

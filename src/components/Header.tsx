@@ -23,7 +23,7 @@ const navLinks = [
 export function Header() {
   const hydrated = useHydrated();
   const cartCount = useStore((s) => s.cart.reduce((a, c) => a + c.quantity, 0));
-  const currentUser = useStore((s) => s.users.find((u) => u.id === s.currentUserId));
+  const currentUser = useStore((s) => s.currentUser);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();

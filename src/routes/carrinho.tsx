@@ -14,7 +14,7 @@ export const Route = createFileRoute("/carrinho")({
 function CartPage() {
   const cart = useStore((s) => s.cart);
   const products = useStore((s) => s.products);
-  const currentUser = useStore((s) => s.users.find((u) => u.id === s.currentUserId));
+  const currentUser = useStore((s) => s.currentUser);
   const [coupon, setCoupon] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState("");
   const navigate = useNavigate();

@@ -25,12 +25,19 @@ const methods: { id: PaymentMethod; label: string; desc: string; icon: typeof Cr
   { id: "recurring", label: "Pagamento recorrente", desc: "Receba mensalmente (simulado)", icon: Repeat },
 ];
 
+const methodLabel: Record<PaymentMethod, string> = {
+  credit: "Cartão de Crédito",
+  debit: "Cartão de Débito",
+  pix: "PIX",
+  recurring: "Recorrente",
+};
+
 function CheckoutPage() {
   const navigate = useNavigate();
   const { coupon = "" } = Route.useSearch();
   const cart = useStore((s) => s.cart);
   const products = useStore((s) => s.products);
-  const currentUser = useStore((s) => s.users.find((u) => u.id === s.currentUserId));
+  const currentUser = useStore((s) => s.currentUser);
   const calc = calcCart(cart, products, coupon);
 
   const [method, setMethod] = useState<PaymentMethod>("credit");
@@ -60,52 +67,41 @@ function CheckoutPage() {
     }
     setProcessing(true);
 
-    // Tenta enviar para o back-end (não bloqueia o pedido local se falhar)
-    const methodLabel = ({ credit: "Cartão de Crédito", debit: "Cartão de Débito", pix: "PIX", recurring: "Recorrente" } as const)[method];
     if (currentUser?.backendId) {
       try {
-        const pagamento = await pagamentosApi.create({
-          metodo: methodLabel,
-          status_pagamento: "Pago",
-          data_pagamento: new Date().toISOString().slice(0, 10),
-          status_entrega: "Pendente",
-          valor: calc.total,
-        });
-        const idPagamento = (pagamento as { id?: number; id_pagamento?: number }).id ?? (pagamento as { id_pagamento?: number }).id_pagamento;
+        // 1. Criar pedido primeiro
         const pedido = await pedidosApi.create({
           frete: 0,
           cupom: coupon || null,
           total: calc.total,
           data_hora: new Date().toISOString(),
           id_cliente: currentUser.backendId,
-          id_pagamento: idPagamento ?? null,
         });
-        const idPedido = (pedido as { id?: number; id_pedido?: number }).id ?? (pedido as { id_pedido?: number }).id_pedido;
+        const idPedido = pedido.id ?? (pedido as any).id_pedido;
+
         if (idPedido) {
-          await Promise.all(
-            calc.items.map((it) =>
-              pedidosApi.addItem(idPedido, {
-                id_produto: Number(it.productId),
-                quantidade: it.quantity,
-                preco_unitario: it.product.price,
-              }),
-            ),
-          );
+          // 2. Criar pagamento com o id do pedido
+          await pagamentosApi.create({
+            metodo: methodLabel[method],
+            status_pagamento: "Pago",
+            data_pagamento: new Date().toISOString().slice(0, 10),
+            status_entrega: "Pendente",
+            valor: calc.total,
+            id_pedido: idPedido,
+          });
         }
       } catch (err) {
         console.error("Falha ao registrar pedido na API", err);
-        toast.error(`API: ${(err as Error).message}`);
+        toast.error(`Erro ao registrar pedido: ${(err as Error).message}`);
+        setProcessing(false);
+        return;
       }
     }
 
-    const r = actions.checkout(coupon, method);
+    actions.clearCart();
     setProcessing(false);
-    if (r.ok) {
-      toast.success("Pagamento aprovado! Pedido registrado.");
-      navigate({ to: "/" });
-    } else {
-      toast.error("Falha ao processar pedido");
-    }
+    toast.success("Pagamento aprovado! Pedido registrado.");
+    navigate({ to: "/" });
   };
 
   return (

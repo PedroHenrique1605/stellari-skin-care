@@ -19,7 +19,7 @@ const links: ReadonlyArray<{ to: "/admin" | "/admin/clientes" | "/admin/vendas" 
 ];
 
 function AdminLayout() {
-  const currentUser = useStore((s) => s.users.find((u) => u.id === s.currentUserId));
+  const currentUser = useStore((s) => s.currentUser);
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 

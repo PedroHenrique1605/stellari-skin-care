@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { actions, useStore, getState } from "@/lib/store";
+import { actions, useStore } from "@/lib/store";
 import { clientesApi, pickId } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/login")({
 const registerSchema = z.object({
   name: z.string().trim().min(2).max(100),
   email: z.string().trim().email().max(255),
-  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres").max(72),
+  password: z.string().min(8, "Senha deve ter pelo menos 8 caracteres").max(72),
   telefone: z.string().regex(/^\d{10,11}$/, "Telefone deve ter 10 ou 11 dígitos numéricos"),
   cpf: z.string().regex(/^\d{11}$/, "CPF deve ter 11 dígitos numéricos (sem máscara)"),
   data_nascimento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data deve estar no formato AAAA-MM-DD"),
@@ -26,9 +26,8 @@ const registerSchema = z.object({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const currentUser = useStore((s) => s.users.find((u) => u.id === s.currentUserId));
+  const currentUser = useStore((s) => s.currentUser);
 
-  // Safe redirect after render when already logged in
   useEffect(() => {
     if (currentUser) {
       navigate({ to: currentUser.role === "admin" ? "/admin" : "/" });
@@ -38,21 +37,40 @@ function LoginPage() {
   const [login, setLogin] = useState({ email: "", password: "" });
   const [reg, setReg] = useState({ name: "", email: "", password: "", telefone: "", cpf: "", data_nascimento: "" });
 
-  const doLogin = (e: React.FormEvent) => {
+  const doLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const r = actions.login(login.email, login.password);
-    if (!r.ok) return toast.error(r.error!);
-    toast.success("Bem-vinda de volta!");
-    const s = getState();
-    const me = s.users.find((u) => u.id === s.currentUserId);
-    navigate({ to: me?.role === "admin" ? "/admin" : "/" });
+
+    // Admin local
+    if (login.email === "admin@stellari.com" && login.password === "admin123") {
+      actions.setCurrentUser({ id: "admin-1", name: "Admin Stellari", email: "admin@stellari.com", role: "admin" });
+      toast.success("Bem-vinda de volta!");
+      navigate({ to: "/admin" });
+      return;
+    }
+
+    // Cliente via backend
+    try {
+      const cliente = await clientesApi.login(login.email, login.password);
+      const backendId = pickId(cliente);
+      actions.setCurrentUser({
+        id: `client-${backendId}`,
+        backendId,
+        name: cliente.nome,
+        email: cliente.email,
+        role: "client",
+      });
+      toast.success("Bem-vinda de volta!");
+      navigate({ to: "/" });
+    } catch (err) {
+      toast.error(`Credenciais inválidas: ${(err as Error).message}`);
+    }
   };
 
   const doRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     const r = registerSchema.safeParse(reg);
     if (!r.success) return toast.error(r.error.errors[0].message);
-    let backendId: number | undefined;
+
     try {
       const created = await clientesApi.create({
         nome: reg.name,
@@ -62,15 +80,19 @@ function LoginPage() {
         cpf: reg.cpf,
         data_nascimento: reg.data_nascimento,
       });
-      backendId = pickId(created);
+      const backendId = pickId(created);
+      actions.setCurrentUser({
+        id: `client-${backendId}`,
+        backendId,
+        name: reg.name,
+        email: reg.email,
+        role: "client",
+      });
+      toast.success("Conta criada com sucesso!");
+      navigate({ to: "/" });
     } catch (err) {
-      toast.error(`Falha ao criar cliente na API: ${(err as Error).message}`);
-      return;
+      toast.error(`Falha ao criar conta: ${(err as Error).message}`);
     }
-    const res = actions.register(reg.name, reg.email, reg.password, backendId);
-    if (!res.ok) return toast.error(res.error!);
-    toast.success("Conta criada com sucesso!");
-    navigate({ to: "/" });
   };
 
   return (
@@ -121,8 +143,8 @@ function LoginPage() {
                 </div>
                 <div>
                   <Label htmlFor="rpass">Senha</Label>
-                  <Input id="rpass" type="password" required value={reg.password} onChange={(e) => setReg({ ...reg, password: e.target.value })} className="mt-1.5" minLength={6} maxLength={72} />
-                  <p className="text-xs text-muted-foreground mt-1.5">Mínimo 6 caracteres. Senha será criptografada.</p>
+                  <Input id="rpass" type="password" required value={reg.password} onChange={(e) => setReg({ ...reg, password: e.target.value })} className="mt-1.5" minLength={8} maxLength={72} />
+                  <p className="text-xs text-muted-foreground mt-1.5">Mínimo 8 caracteres.</p>
                 </div>
                 <div>
                   <Label htmlFor="rtel">Telefone</Label>

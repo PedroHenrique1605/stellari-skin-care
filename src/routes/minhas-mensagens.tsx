@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
 import { useNavigate } from "@tanstack/react-router";
+import { mensagensApi, type ApiMensagem } from "@/lib/api";
 import { Mail, Reply, MessageCircle } from "lucide-react";
 
 export const Route = createFileRoute("/minhas-mensagens")({
@@ -10,22 +11,22 @@ export const Route = createFileRoute("/minhas-mensagens")({
 });
 
 function MyMessagesPage() {
-  const currentUser = useStore((s) => s.users.find((u) => u.id === s.currentUserId));
-  const allMessages = useStore((s) => s.messages);
-  const messages = useMemo(
-    () =>
-      currentUser
-        ? allMessages.filter(
-            (m) => m.userId === currentUser.id || m.email === currentUser.email,
-          )
-        : [],
-    [allMessages, currentUser],
-  );
+  const currentUser = useStore((s) => s.currentUser);
   const navigate = useNavigate();
+  const [messages, setMessages] = useState<ApiMensagem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (typeof window !== "undefined" && !currentUser) navigate({ to: "/login" });
   }, [currentUser, navigate]);
+
+  useEffect(() => {
+    if (!currentUser?.backendId) { setLoading(false); return; }
+    mensagensApi.listByCliente(currentUser.backendId)
+      .then(setMessages)
+      .catch(() => setMessages([]))
+      .finally(() => setLoading(false));
+  }, [currentUser]);
 
   if (!currentUser) return null;
 
@@ -40,7 +41,9 @@ function MyMessagesPage() {
         </p>
       </div>
 
-      {messages.length === 0 ? (
+      {loading ? (
+        <div className="text-center py-12 text-muted-foreground">Carregando mensagens...</div>
+      ) : messages.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12 text-center text-muted-foreground shadow-soft">
           <Mail className="h-12 w-12 mx-auto mb-3 opacity-40" strokeWidth={1} />
           <p>Você ainda não enviou nenhuma mensagem.</p>
@@ -53,7 +56,7 @@ function MyMessagesPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {[...messages].reverse().map((m) => (
+          {messages.map((m) => (
             <div key={m.id} className="bg-card rounded-2xl border border-border shadow-soft p-6">
               <div className="flex items-start gap-3 mb-3">
                 <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center shrink-0 text-xs font-semibold">
@@ -61,13 +64,13 @@ function MyMessagesPage() {
                 </div>
                 <div className="flex-1">
                   <p className="text-xs text-muted-foreground mb-1">
-                    Você · {new Date(m.date).toLocaleString("pt-BR")}
+                    Você · {m.data_hora ? new Date(m.data_hora).toLocaleString("pt-BR") : ""}
                   </p>
-                  <p className="text-sm bg-muted/40 rounded-lg p-3 leading-relaxed">{m.message}</p>
+                  <p className="text-sm bg-muted/40 rounded-lg p-3 leading-relaxed">{m.mensagem}</p>
                 </div>
               </div>
 
-              {m.reply ? (
+              {m.resposta ? (
                 <div className="flex items-start gap-3 mt-4">
                   <div className="h-9 w-9 rounded-full bg-gradient-primary text-primary-foreground flex items-center justify-center shrink-0 text-xs font-semibold">
                     S
@@ -75,14 +78,14 @@ function MyMessagesPage() {
                   <div className="flex-1">
                     <p className="text-xs text-primary font-medium mb-1 flex items-center gap-1">
                       <Reply className="h-3 w-3" /> Stellari Suporte
-                      {m.replyDate && (
+                      {m.data_resposta && (
                         <span className="text-muted-foreground font-normal">
-                          · {new Date(m.replyDate).toLocaleString("pt-BR")}
+                          · {new Date(m.data_resposta).toLocaleString("pt-BR")}
                         </span>
                       )}
                     </p>
                     <p className="text-sm bg-primary/5 border border-primary/10 rounded-lg p-3 leading-relaxed">
-                      {m.reply}
+                      {m.resposta}
                     </p>
                   </div>
                 </div>

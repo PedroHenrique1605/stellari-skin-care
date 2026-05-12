@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
-import { actions, useStore } from "@/lib/store";
+import { useStore } from "@/lib/store";
+import { mensagensApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,11 +32,11 @@ const schema = z.object({
 });
 
 function SupportPage() {
-  const currentUser = useStore((s) => s.users.find((u) => u.id === s.currentUserId));
+  const currentUser = useStore((s) => s.currentUser);
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [sent, setSent] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const data = currentUser
       ? { name: currentUser.name, email: currentUser.email, message: form.message }
@@ -45,10 +46,19 @@ function SupportPage() {
       toast.error(r.error.errors[0].message);
       return;
     }
-    actions.sendMessage(data.name, data.email, data.message, currentUser?.id);
-    setSent(true);
-    setForm({ name: "", email: "", message: "" });
-    toast.success("Mensagem enviada com sucesso!");
+    try {
+      await mensagensApi.create({
+        nome: data.name,
+        email: data.email,
+        mensagem: data.message,
+        id_cliente: currentUser?.backendId ?? null,
+      });
+      setSent(true);
+      setForm({ name: "", email: "", message: "" });
+      toast.success("Mensagem enviada com sucesso!");
+    } catch (err) {
+      toast.error(`Falha ao enviar mensagem: ${(err as Error).message}`);
+    }
   };
 
   return (
@@ -65,7 +75,6 @@ function SupportPage() {
 
       <section className="container mx-auto px-4 lg:px-8 py-16">
         <div className="grid lg:grid-cols-2 gap-12">
-          {/* FAQ */}
           <div>
             <h2 className="font-display text-3xl font-medium mb-2 flex items-center gap-2">
               <MessageCircle className="h-6 w-6 text-primary" /> Perguntas frequentes
@@ -81,7 +90,6 @@ function SupportPage() {
             </Accordion>
           </div>
 
-          {/* Form */}
           <div>
             <h2 className="font-display text-3xl font-medium mb-2 flex items-center gap-2">
               <Mail className="h-6 w-6 text-primary" /> Envie sua mensagem
@@ -89,14 +97,23 @@ function SupportPage() {
             <p className="text-sm text-muted-foreground mb-6">Nossa equipe retornará em breve.</p>
 
             <form onSubmit={submit} className="bg-card rounded-2xl border border-border shadow-soft p-8 space-y-5">
-              <div>
-                <Label htmlFor="name">Nome</Label>
-                <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="mt-1.5" maxLength={100} />
-              </div>
-              <div>
-                <Label htmlFor="email">E-mail *</Label>
-                <Input id="email" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-1.5" maxLength={255} />
-              </div>
+              {!currentUser && (
+                <>
+                  <div>
+                    <Label htmlFor="name">Nome</Label>
+                    <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="mt-1.5" maxLength={100} />
+                  </div>
+                  <div>
+                    <Label htmlFor="email">E-mail *</Label>
+                    <Input id="email" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-1.5" maxLength={255} />
+                  </div>
+                </>
+              )}
+              {currentUser && (
+                <p className="text-sm text-muted-foreground">
+                  Enviando como <span className="font-medium text-foreground">{currentUser.name}</span>
+                </p>
+              )}
               <div>
                 <Label htmlFor="message">Mensagem *</Label>
                 <Textarea id="message" required rows={5} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className="mt-1.5" maxLength={1000} />

@@ -1,8 +1,6 @@
-// Cliente HTTP para o back-end Stellari (http://localhost:3000)
-// Configurável via VITE_API_URL.
 export const API_BASE =
   (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_API_URL) ||
-  "http://localhost:3000";
+  "http://localhost:3104";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -22,23 +20,6 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 // ===== Tipos do back-end =====
-export type ApiProduto = {
-  id?: number;
-  id_produto?: number;
-  nome_produto: string;
-  composicao?: string;
-  indicacao?: string;
-  beneficios?: string;
-  advertencias?: string;
-  modo_uso?: string;
-  lote?: string;
-  validade?: string;
-  descricao?: string;
-  finalidade?: string;
-  valor: number | string;
-  id_categoria?: number;
-};
-
 export type ApiCliente = {
   id?: number;
   id_cliente?: number;
@@ -56,19 +37,35 @@ export type ApiItemCarrinho = {
   quantidade: number;
 };
 
-// ===== Produtos =====
-export const produtosApi = {
-  list: () => request<ApiProduto[]>("/produtos"),
-  get: (id: number) => request<ApiProduto>(`/produtos/${id}`),
+export type ApiMensagem = {
+  id?: number;
+  nome: string;
+  email: string;
+  mensagem: string;
+  data_hora?: string;
+  resposta?: string | null;
+  data_resposta?: string | null;
+  id_cliente?: number | null;
+};
+
+export type ApiPedido = {
+  id?: number;
+  frete: number;
+  cupom?: string | null;
+  total: number;
+  data_hora?: string;
+  id_cliente?: number;
+  id_endereco?: number | null;
 };
 
 // ===== Clientes =====
 export const clientesApi = {
   list: () => request<ApiCliente[]>("/clientes"),
-  searchByName: (nome: string) =>
-    request<ApiCliente[]>(`/clientes?nome=${encodeURIComponent(nome)}`),
+  get: (id: number) => request<ApiCliente>(`/clientes/${id}`),
   create: (c: ApiCliente) =>
     request<ApiCliente>("/clientes", { method: "POST", body: JSON.stringify(c) }),
+  login: (email: string, senha: string) =>
+    request<ApiCliente>("/clientes/login", { method: "POST", body: JSON.stringify({ email, senha }) }),
 };
 
 // ===== Carrinho =====
@@ -89,23 +86,20 @@ export const carrinhoApi = {
 
 // ===== Pedidos =====
 export const pedidosApi = {
+  listAll: () => request<ApiPedido[]>("/pedidos"),
+  listByCliente: (idCliente: number) =>
+    request<ApiPedido[]>(`/pedidos?id_cliente=${idCliente}`),
   create: (data: {
     frete: number;
-    cupom: string | null;
+    cupom?: string | null;
     total: number;
     data_hora: string;
     id_cliente: number;
     id_endereco?: number | null;
-    id_pagamento?: number | null;
   }) => request<{ id?: number; id_pedido?: number }>("/pedidos", {
     method: "POST",
     body: JSON.stringify(data),
   }),
-  addItem: (idPedido: number, item: { id_produto: number; quantidade: number; preco_unitario: number }) =>
-    request<unknown>(`/pedidos/${idPedido}/itens`, {
-      method: "POST",
-      body: JSON.stringify(item),
-    }),
 };
 
 // ===== Pagamentos =====
@@ -116,11 +110,25 @@ export const pagamentosApi = {
     data_pagamento: string | null;
     status_entrega: string;
     valor: number;
-    id_pedido?: number | null;
+    id_pedido: number;
   }) => request<{ id?: number; id_pagamento?: number }>("/pagamentos", {
     method: "POST",
     body: JSON.stringify(data),
   }),
+};
+
+// ===== Mensagens =====
+export const mensagensApi = {
+  listAll: () => request<ApiMensagem[]>("/mensagens"),
+  listByCliente: (idCliente: number) =>
+    request<ApiMensagem[]>(`/mensagens?id_cliente=${idCliente}`),
+  create: (data: { nome: string; email: string; mensagem: string; id_cliente?: number | null }) =>
+    request<ApiMensagem>("/mensagens", { method: "POST", body: JSON.stringify(data) }),
+  reply: (id: number, resposta: string) =>
+    request<unknown>(`/mensagens/${id}/resposta`, {
+      method: "POST",
+      body: JSON.stringify({ resposta }),
+    }),
 };
 
 // ===== Helpers =====

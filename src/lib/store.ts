@@ -1,4 +1,3 @@
-// Frontend-only store using localStorage. All "persisted" data lives in the browser.
 import { useEffect, useState, useSyncExternalStore } from "react";
 import productJar from "@/assets/product-cream-jar.jpeg";
 import productTube from "@/assets/product-gel-tube.jpeg";
@@ -60,40 +59,22 @@ const defaultProducts: Product[] = [
 ];
 
 export type CartItem = { productId: string; quantity: number };
-export type User = { id: string; name: string; email: string; password: string; role: "client" | "admin"; backendId?: number };
+export type User = { id: string; backendId?: number; name: string; email: string; role: "client" | "admin" };
 export type PaymentMethod = "credit" | "debit" | "pix" | "recurring";
-export type Order = {
-  id: string;
-  userId: string;
-  userName: string;
-  items: CartItem[];
-  total: number;
-  date: string;
-  paymentMethod?: PaymentMethod;
-};
-export type Message = { id: string; userId?: string; name: string; email: string; message: string; date: string; reply?: string; replyDate?: string };
 
 type State = {
   products: Product[];
   cart: CartItem[];
-  users: User[];
-  currentUserId: string | null;
-  orders: Order[];
-  messages: Message[];
-  coupons: Record<string, number>; // code -> percent
+  currentUser: User | null;
+  coupons: Record<string, number>;
 };
 
-const STORAGE_KEY = "stellari-state-v1";
+const STORAGE_KEY = "stellari-state-v2";
 
 const initialState: State = {
   products: defaultProducts,
   cart: [],
-  users: [
-    { id: "admin-1", name: "Admin Stellari", email: "admin@stellari.com", password: "admin123", role: "admin" },
-  ],
-  currentUserId: null,
-  orders: [],
-  messages: [],
+  currentUser: null,
   coupons: { STELLARI10: 10, BEMVINDA: 15 },
 };
 
@@ -106,7 +87,6 @@ function loadState(): State {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return initialState;
     const parsed = JSON.parse(raw) as State;
-    // Always refresh product images (imports change between builds)
     return {
       ...initialState,
       ...parsed,
@@ -150,7 +130,6 @@ export function useStore<T>(selector: (s: State) => T): T {
   );
 }
 
-// Hydration-safe boolean for client-only rendering
 export function useHydrated() {
   const [h, setH] = useState(false);
   useEffect(() => setH(true), []);
@@ -182,57 +161,11 @@ export const actions = {
   clearCart() {
     setState((s) => ({ ...s, cart: [] }));
   },
-  register(name: string, email: string, password: string, backendId?: number): { ok: boolean; error?: string } {
-    if (state.users.some((u) => u.email === email)) return { ok: false, error: "E-mail já cadastrado" };
-    const id = `user-${Date.now()}`;
-    setState((s) => ({
-      ...s,
-      users: [...s.users, { id, name, email, password: btoa(password), role: "client", backendId }],
-      currentUserId: id,
-    }));
-    return { ok: true };
-  },
-  setProductsFromApi(products: Product[]) {
-    setState((s) => ({ ...s, products }));
-  },
-  login(email: string, password: string): { ok: boolean; error?: string } {
-    const user = state.users.find(
-      (u) => u.email === email && (u.password === password || u.password === btoa(password)),
-    );
-    if (!user) return { ok: false, error: "Credenciais inválidas" };
-    setState((s) => ({ ...s, currentUserId: user.id }));
-    return { ok: true };
+  setCurrentUser(user: User) {
+    setState((s) => ({ ...s, currentUser: user }));
   },
   logout() {
-    setState((s) => ({ ...s, currentUserId: null }));
-  },
-  checkout(coupon: string, paymentMethod: PaymentMethod = "credit"): { ok: boolean; orderId?: string } {
-    const u = state.users.find((x) => x.id === state.currentUserId);
-    if (!u || state.cart.length === 0) return { ok: false };
-    const subtotal = state.cart.reduce((a, c) => {
-      const p = state.products.find((x) => x.id === c.productId);
-      return a + (p?.price ?? 0) * c.quantity;
-    }, 0);
-    const discountPct = state.coupons[coupon.toUpperCase()] ?? 0;
-    const total = subtotal * (1 - discountPct / 100);
-    const order: Order = {
-      id: `order-${Date.now()}`,
-      userId: u.id,
-      userName: u.name,
-      items: state.cart,
-      total,
-      date: new Date().toISOString(),
-      paymentMethod,
-    };
-    setState((s) => ({ ...s, orders: [...s.orders, order], cart: [] }));
-    return { ok: true, orderId: order.id };
-  },
-  sendMessage(name: string, email: string, message: string, userId?: string) {
-    const m: Message = { id: `msg-${Date.now()}`, userId, name, email, message, date: new Date().toISOString() };
-    setState((s) => ({ ...s, messages: [...s.messages, m] }));
-  },
-  replyMessage(id: string, reply: string) {
-    setState((s) => ({ ...s, messages: s.messages.map((m) => (m.id === id ? { ...m, reply, replyDate: new Date().toISOString() } : m)) }));
+    setState((s) => ({ ...s, currentUser: null }));
   },
   saveProduct(p: Product) {
     setState((s) => ({
