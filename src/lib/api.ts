@@ -1,6 +1,6 @@
 export const API_BASE =
   (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_API_URL) ||
-  "http://localhost:3104";
+  "http://grupo04projeto20261.escolatecnicaadelia.info/api:3004";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
